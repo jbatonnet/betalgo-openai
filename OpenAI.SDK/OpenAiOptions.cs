@@ -176,11 +176,6 @@ public class OpenAiOptions
             throw new ArgumentNullException(nameof(ApiKey));
         }
 
-        if (string.IsNullOrEmpty(ApiVersion))
-        {
-            throw new ArgumentNullException(nameof(ApiVersion));
-        }
-
         if (string.IsNullOrEmpty(BaseDomain))
         {
             if (ProviderType == ProviderType.Azure && string.IsNullOrEmpty(ResourceName))
