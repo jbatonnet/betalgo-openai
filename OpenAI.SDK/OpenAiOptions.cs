@@ -13,7 +13,12 @@ public enum ProviderType
     /// <summary>
     ///     Azure Provider
     /// </summary>
-    Azure = 2
+    Azure = 2,
+
+    /// <summary>
+    ///     Perplexity AI Privider
+    /// </summary>
+    PerplexityAi = 3
 }
 
 public class OpenAiOptions
@@ -21,6 +26,7 @@ public class OpenAiOptions
     private const string OpenAiDefaultApiVersion = "v1";
     private const string OpenAiDefaultBaseDomain = "https://api.openai.com/";
     private const string AzureOpenAiDefaultApiVersion = "2023-12-01-preview";
+    private const string PerplexityAiDefaultBaseDomain = "https://api.perplexity.ai/";
 
 
     /// <summary>
@@ -62,12 +68,16 @@ public class OpenAiOptions
     {
         get
         {
+            // Perplexity AI doesn't use a version
+#pragma warning disable CS8603
             return _apiVersion ??= ProviderType switch
             {
                 ProviderType.OpenAi => OpenAiDefaultApiVersion,
                 ProviderType.Azure => AzureOpenAiDefaultApiVersion,
+                ProviderType.PerplexityAi => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(ProviderType))
             };
+#pragma warning restore CS8603
         }
         set => _apiVersion = value;
     }
@@ -86,6 +96,7 @@ public class OpenAiOptions
             {
                 ProviderType.OpenAi => OpenAiDefaultBaseDomain,
                 ProviderType.Azure => ResourceName == null ? null : $"https://{ResourceName}.openai.azure.com/",
+                ProviderType.PerplexityAi => PerplexityAiDefaultBaseDomain,
                 _ => throw new ArgumentOutOfRangeException(nameof(ProviderType))
             };
 #pragma warning restore CS8603
@@ -176,7 +187,7 @@ public class OpenAiOptions
             throw new ArgumentNullException(nameof(ApiKey));
         }
 
-        if (string.IsNullOrEmpty(ApiVersion))
+        if (ProviderType != ProviderType.PerplexityAi && string.IsNullOrEmpty(ApiVersion))
         {
             throw new ArgumentNullException(nameof(ApiVersion));
         }
@@ -213,6 +224,18 @@ public class OpenAiOptions
             if (!string.IsNullOrEmpty(ResourceName))
             {
                 throw new ArgumentException(nameof(ResourceName) + " is not supported for OpenAi Provider. Set ProviderType to Azure or remove " + nameof(ResourceName));
+            }
+        }
+        else if (ProviderType == ProviderType.PerplexityAi)
+        {
+            if (!string.IsNullOrEmpty(DeploymentId))
+            {
+                throw new ArgumentException(nameof(DeploymentId) + " is not supported for PerplexityAi Provider. Set ProviderType to Azure or remove " + nameof(DeploymentId));
+            }
+
+            if (!string.IsNullOrEmpty(ResourceName))
+            {
+                throw new ArgumentException(nameof(ResourceName) + " is not supported for PerplexityAi Provider. Set ProviderType to Azure or remove " + nameof(ResourceName));
             }
         }
     }

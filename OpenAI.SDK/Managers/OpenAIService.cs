@@ -40,6 +40,7 @@ public partial class OpenAIService : IOpenAIService, IDisposable
                 _httpClient.DefaultRequestHeaders.Add("api-key", settings.ApiKey);
                 break;
             case ProviderType.OpenAi:
+            case ProviderType.PerplexityAi:
             default:
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {settings.ApiKey}");
                 break;
@@ -53,6 +54,7 @@ public partial class OpenAIService : IOpenAIService, IDisposable
         _endpointProvider = settings.ProviderType switch
         {
             ProviderType.Azure => new AzureOpenAiEndpointProvider(settings.ApiVersion, settings.DeploymentId!),
+            ProviderType.PerplexityAi => new PerplexityAiEndpointProvider(),
             _ => new OpenAiEndpointProvider(settings.ApiVersion)
         };
 
